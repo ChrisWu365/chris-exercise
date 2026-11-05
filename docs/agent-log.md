@@ -596,4 +596,12 @@ The user approved a 15-second limit on the AC-27 logic test, with its assertions
 ### Prompt 68 (2026-11-06)
 > yes
 
-**Files read:** none. The agent committed and pushed Task 7 so CI could run its browser tests.
+**Files read:** `README.md`, `.github/workflows/ci-cd.yml`, `docs/04-test-strategy.md`, `scripts/check-browser-files.ts`. The agent committed and pushed Task 7 so CI could run its browser tests, then did the reduced Task 8: a script that fails if a criterion has no test, and the README's pipeline gaps.
+
+
+### Prompt 69 (2026-11-06)
+> 1.  yes 2. ok 3. no, remove deploy from dev logic, deploy from main only
+
+The user confirmed `main` is the only deployment branch, and approved removing two unbuilt items from the test strategy.
+
+**Files read:** `.github/workflows/ci-cd.yml`. The agent committed and pushed Task 8. The workflow already deployed from `main` only, so no logic needed removing.
