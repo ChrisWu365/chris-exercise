@@ -29,11 +29,15 @@ jobs:
           if [ -n "$diff" ]; then echo "$diff"; exit 1; fi
       - name: Use the throwaway database's disposable keys
         run: |
-          npx supabase status -o env \
-            --override-name api.url=SUPABASE_URL \
-            --override-name auth.anon_key=SUPABASE_ANON_KEY \
-            --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY \
-            | grep -E '^SUPABASE_(URL|ANON_KEY|SERVICE_ROLE_KEY)=' | tr -d '"' >> "$GITHUB_ENV"
+          npx supabase status -o env > "$RUNNER_TEMP/status.env"
+          echo "Available names:" $(cut -d= -f1 "$RUNNER_TEMP/status.env")
+          set -a; . "$RUNNER_TEMP/status.env"; set +a
+          set -u
+          {
+            echo "SUPABASE_URL=$API_URL"
+            echo "SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
 
       - run: npm run build
       - run: npm run check:browser-files
