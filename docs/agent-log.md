@@ -576,4 +576,12 @@ The user declined requiring `checks` to merge into `main` (no reason given) and 
 ### Prompt 65 (2026-11-06)
 > yes
 
-**Files read:** none. The agent committed and pushed Task 6 so CI could run its browser and check logic tests.
+**Files read:** none. The agent committed and pushed Task 6 so CI could run its browser and check logic tests. CI failed on a test's time limit, and the agent stopped to ask.
+
+
+### Prompt 66 (2026-11-06)
+> yes
+
+The user approved a 15-second limit on the AC-27 logic test, with its assertions unchanged, so the Supabase client's retries can finish.
+
+**Files read:** none.
