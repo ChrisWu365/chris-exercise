@@ -154,6 +154,12 @@ This log tracks how the coding agent (Claude Code) was directed and corrected du
 - **Decision:** Moved. They are now seed input cases, with a note that `numeric(12,3)` would silently round `1.2345`.
 - **Reason:** The user pointed out that the field type is `numeric(12,3)`, so these values can't happen there.
 
+### 2026-11-06: A planned code can't have no products
+- **Task:** Settle whether a planned installation can exist without mapped products.
+- **Agent suggested:** Keeping the approved version, which allowed `9999` with blank details and a warning, or adding a seed rule to reject it.
+- **Decision:** A planned code can't have no products. The seed aborts, and the warning, the blank CSV row and AC-15, AC-23, AC-28 and AC-29 are removed. The user held the push until this was settled; the changes aren't committed.
+- **Reason:** The user stated that a planned code can't have no products; no further reason was given.
+
 ## Prompts and files read
 
 Prompts are verbatim.
@@ -337,3 +343,18 @@ This log was not updated during that task because the prompt said not to change 
 > change please
 
 **Files read:** None. The agent edited `docs/04-test-strategy.md` and `docs/agent-log.md` from content it had already read.
+
+### Prompt 31 (2026-11-06)
+> commit now. Use conventional commit format, one concern per commit
+
+**Files read:** None opened directly. The agent checked the working tree and searched the changed files and commit messages for the company name.
+
+### Prompt 32 (2026-11-06)
+> 1. a planned code can't have no products.3.  push if there is no change with 1
+
+**Files read:** None. The agent edited `docs/02-slice-spec.md`, `docs/03-technical-design.md`, `docs/04-test-strategy.md`, `AGENTS.md`, ADR 0017 and `docs/agent-log.md` from content it had already read. It didn't push, because the answer changed the documents.
+
+### Prompt 33 (2026-11-06)
+> commit and push these changes
+
+**Files read:** None opened directly. The agent checked the working tree and searched the changed files for the company name.
