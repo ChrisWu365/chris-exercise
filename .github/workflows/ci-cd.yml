@@ -93,9 +93,25 @@ jobs:
       - run: npx vercel@65.11.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
 
       - name: Smoke-test the public URL
+        id: smoke
         run: |
           npx playwright install --with-deps chromium
           npm run test:e2e
+      - name: Show the site's server errors
+        if: failure() && steps.smoke.outcome == 'failure'
+        run: |
+          host="$(echo "$SMOKE_URL" | sed -E 's#https?://##; s#/.*##')"
+          api="https://api.vercel.com"
+          id="$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "$api/v13/deployments/$host?teamId=$VERCEL_ORG_ID" | jq -r '.id')"
+          errors=""
+          # The log stream sometimes returns nothing at first, so try a few times.
+          for attempt in 1 2 3; do
+            (sleep 5; curl -s -o /dev/null "$SMOKE_URL"; sleep 3; curl -s -o /dev/null "$SMOKE_URL") &
+            errors="$(curl -s -m 25 -H "Authorization: Bearer $VERCEL_TOKEN" "$api/v1/projects/$VERCEL_PROJECT_ID/deployments/$id/runtime-logs?teamId=$VERCEL_ORG_ID"               | jq -Rr 'fromjson? | select(.level == "error") | .message' | cut -c1-400 | sort -u || true)"
+            wait
+            if [ -n "$errors" ]; then break; fi
+          done
+          echo "${errors:-No server errors could be read. There may still be some, so check Logs in Vercel.}"
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
