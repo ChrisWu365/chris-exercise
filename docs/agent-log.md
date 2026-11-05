@@ -160,6 +160,18 @@ This log tracks how the coding agent (Claude Code) was directed and corrected du
 - **Decision:** A planned code can't have no products. The seed aborts, and the warning, the blank CSV row and AC-15, AC-23, AC-28 and AC-29 are removed. The user held the push until this was settled; the changes aren't committed.
 - **Reason:** The user stated that a planned code can't have no products; no further reason was given.
 
+### 2026-11-06: Smoke test switched off
+- **Task:** Decide how the deploy job treats the failing check of the deployed site.
+- **Agent suggested:** Keeping the smoke test and seeding production so that it passes.
+- **Decision:** Switched off in the pipeline. The test file stays, and still runs in CI against the throwaway database. The agent noted this overrides the `AGENTS.md` rule against skipping tests.
+- **Reason:** The web app is deployed to Vercel and only some smoke tests failed; the user wants to focus on other tests and then function implementation.
+
+### 2026-11-06: Vercel CLI as a dev dependency
+- **Task:** Keep the Vercel CLI version under control in the pipeline.
+- **Agent suggested:** Adding it as a dev dependency, which the user approved as part of the CI list.
+- **Decision:** The agent reversed its own suggestion after install, and pins the version in one workflow variable instead.
+- **Reason:** It added 254 packages and took the audit to 45 vulnerabilities, including 1 critical.
+
 ## Prompts and files read
 
 Prompts are verbatim.
@@ -455,3 +467,27 @@ The log text is shortened here. **Files read:** `.env.production.local` was read
 > yes
 
 The user approved printing Vercel's runtime errors in the deploy job when the smoke test fails. **Files read:** `.github/workflows/ci-cd.yml`. The agent tested the new step against the live site on a temporary branch it then deleted.
+
+
+### Prompt 49 (2026-11-06)
+> which branches do you want me to merge
+
+**Files read:** None. The agent compared remote branches with `main`, and checked the deploy run and live site.
+
+
+### Prompt 50 (2026-11-06)
+> I have switch back to walking-skeleton branch, let's move on
+
+The agent took this as the next planned task, Task 1 (schema, RLS and seed), and wrote its tests first. **Files read:** `docs/04-test-strategy.md` (order of work), `docs/agent-log.md`, `.env.local` (used only to run the RLS tests against the local project, with no values displayed).
+
+
+### Prompt 51 (2026-11-06)
+> just skip smoke tests, I find that the web app is successfully deployed to vercel, only some smoke test failed. No let's focus on other tests and then function implementation. Before that, please check if the ci-cd.yml has aligned with production level standard, with proper cache and component control.
+
+**Files read:** `.github/workflows/ci-cd.yml`. The agent also read GitHub run timings, cache usage and branch rules.
+
+
+### Prompt 52 (2026-11-06)
+> 1. yes 2. yes, what earlier questions, please do it on the current branch, do not switch before asked
+
+**Files read:** `.github/workflows/ci-cd.yml`, `scripts/seed.ts`, `data/sample/sample-data.json`. The agent applied the CI changes and implemented Task 1 on `feature/walking-skeleton`.
