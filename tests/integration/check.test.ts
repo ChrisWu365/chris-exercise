@@ -33,5 +33,6 @@ describe("Check logic", () => {
     const unreachable = createClient("http://127.0.0.1:1", "test-key", { auth: { persistSession: false } });
     expect(await performCheck(unreachable, ["pkg-a"], today)).toEqual({ outcome: "unavailable" });
     expect(log).toHaveBeenCalled();
-  });
+    // The Supabase client retries a failed read for about 7 seconds before reporting it.
+  }, 15_000);
 });
