@@ -1,3 +1,4 @@
+import { SampleDataNotice } from "@/components/notices";
 import { PackageList, PackagesUnavailable } from "@/components/package-list";
 import { createServerClient } from "@/data/client";
 import { listPackages } from "@/data/packages";
@@ -21,7 +22,7 @@ export default async function DashboardPage() {
   return (
     <main>
       <h1>Planned work packages</h1>
-      <p>Packages, material mappings and stock are SAMPLE data.</p>
+      <SampleDataNotice />
       {packages ? <PackageList packages={packages} /> : <PackagesUnavailable />}
     </main>
   );
