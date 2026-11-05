@@ -293,6 +293,7 @@ Pages are rendered dynamically without caching, so a failed request is never ser
 - **Seeding is manual:** if a change needs new data, the owner runs the seed script against each project. CI never holds either project's `service_role` key.
 - **Secrets:** the Supabase access token, production database password and Vercel token are GitHub Actions secrets. Runtime values are Vercel environment variables, pointing at the production project.
 - **Evidence:** the Actions run history and smoke-test step show each successful deployment.
+- **Diagnosis:** if the smoke test fails, the pipeline prints the site's server errors from Vercel's runtime logs, because the error page hides them.
 - **Environments:** one deployed environment is enough for the exercise. Real production use would add staging and a rollback procedure.
 
 ## 14. Main trade-offs
