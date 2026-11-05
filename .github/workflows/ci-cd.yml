@@ -111,7 +111,7 @@ jobs:
             wait
             if [ -n "$errors" ]; then break; fi
           done
-          echo "${errors:-No server errors could be read. This doesn't prove there were none, so check Logs in Vercel.}"
+          echo "${errors:-No server errors could be read. There may still be some, so check Logs in Vercel.}"
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
