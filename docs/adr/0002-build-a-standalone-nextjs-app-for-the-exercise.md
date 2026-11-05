@@ -22,4 +22,4 @@ For production, we recommend adding it as a feature in the existing web app, unl
 - Keeping the rules free of framework and database code makes them portable to either production option.
 - A production feature could reuse existing sign-in, tenants and real records, but would have to follow that app's conventions and release cycle.
 - A production service would need shared sign-in and access to project and stock data, which couples it to the existing database or requires an API.
-- If team leaders prove to need this check on site, the mobile app will need an API, a display of when data was last synced, and queued escalations.
+- If team leaders prove to need this check on site, the mobile app will need an API and a display of when data was last synced.
