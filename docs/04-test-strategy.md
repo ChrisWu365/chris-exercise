@@ -123,6 +123,7 @@ These still need tests, because a requirement could otherwise pass unverified. T
 | --- | --- | --- |
 | FR-1: rows show all fields, with a stable order for shared start dates | Rendered row, and order across repeated loads | Component, Integration |
 | FR-4: dialog shows package details for each ticked package | Rendered dialog | Component |
+| FR-4: products appear in the stated order | Combined rows by earliest start date then product name, and each package's products by name | Unit |
 | FR-5: the CSV has every column, in order | Header row of the built file | Unit |
 | FR-6: the rest of the notices appear on the list and dialog | Sample data, projection, compliance and site readiness text | Component |
 | Accessibility: status has text, and the main flow works by keyboard | Tick, check, export and close using only the keyboard | Component, E2E |

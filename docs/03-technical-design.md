@@ -193,7 +193,7 @@ This example is the AC-06 case, using two real catalogue codes with invented mat
 **Exact decimals.** `src/domain` follows the method in spec section 2:
 - `src/data` selects quantities with a text cast (`quantity_on_hand::text`), so they never become JavaScript numbers.
 - The SAMPLE JSON also stores quantities as strings, such as `"0.1"`, for the same reason.
-- Each string must match up to nine whole digits and three decimal places, or it is rejected. It is then held as a `BigInt` count of thousandths.
+- Each string is held as a `BigInt` count of thousandths. The `numeric(12,3)` column and the seed's checks already limit it to nine whole digits and three decimal places, so the calculation doesn't check this again.
 - This needs no new dependency, since `BigInt` is built into current browsers and Node.js.
 
 **Check rules, in order:**

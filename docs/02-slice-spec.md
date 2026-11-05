@@ -106,7 +106,7 @@ For example, 0.1 + 0.2 against stock of 0.3 is `Available`. JavaScript numbers w
 
 No priority applies between packages, because the check compares only the combined total.
 
-**FR-4 Results dialog.** The check opens a dialog. The combined result is at the top, with each product's required quantity, quantity on hand, shortfall and status. Below it, each selected package shows its planned installations (internal code, catalogue details and installation count) and its required quantity of each product. If a planned installation's code isn't in the catalogue, its catalogue details are left blank, and its mapped products are still calculated and counted in the combined result.
+**FR-4 Results dialog.** The check opens a dialog. The combined result is at the top, with each product's required quantity, quantity on hand, shortfall and status. Below it, each selected package shows its planned installations (internal code, catalogue details and installation count) and its required quantity of each product. If a planned installation's code isn't in the catalogue, its catalogue details are left blank, and its mapped products are still calculated and counted in the combined result. The combined result is ordered by the earliest start date of the selected packages needing each product, then by product name. Each package's products are ordered by product name.
 
 **FR-5 Export.** The dialog has an "Export" button, and it is the only place to export. It builds a CSV file in the browser from the data already in the dialog, with no further server request. The file has one row for each product in each selected package, including `Available` products:
 
