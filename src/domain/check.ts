@@ -32,9 +32,8 @@ export type PackageResult = WorkPackage & {
   required: { product_id: string; required: string }[];
 };
 
-export type CheckResult =
-  | { outcome: "ok"; combined: CombinedRow[]; packages: PackageResult[] }
-  | { outcome: "unavailable"; problem: string };
+export type CheckSuccess = { outcome: "ok"; combined: CombinedRow[]; packages: PackageResult[] };
+export type CheckResult = CheckSuccess | { outcome: "unavailable"; problem: string };
 
 const byName = (a: string, b: string) => a.localeCompare(b, "en");
 

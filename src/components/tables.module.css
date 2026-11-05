@@ -1,0 +1,36 @@
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid #ccc;
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+}
+
+.short {
+  color: #b00020;
+  font-weight: bold;
+}
+
+.dialog {
+  box-sizing: border-box;
+  max-width: 60rem;
+  width: 100%;
+}
+
+/* Keeps Export and Close on screen while the details scroll. */
+.actions {
+  background: #fff;
+  bottom: 0;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  position: sticky;
+}

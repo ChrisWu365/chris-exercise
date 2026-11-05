@@ -85,9 +85,9 @@ AC-15, AC-23, AC-28 and AC-29 have been retired, so they aren't listed.
 | AC-21 | `exported_at` is `2026-11-05T09:30:00+13:00` | ✓ | | | ✓ |
 | AC-22 | Every row has the exact `notice` text | ✓ | | | ✓ |
 | AC-24 | Export after losing the connection matches the dialog | | | | ✓ |
-| AC-25 | Database unavailable on load gives an error and retry, with no list | | ✓ | | ✓ |
+| AC-25 | Database unavailable on load gives an error and retry, with no list | | ✓ | | |
 | AC-26 | No packages gives "No planned work packages" | | ✓ | | |
-| AC-27 | Database unavailable on "Check" gives an error and retry, with no result or "Export" | | ✓ | ✓ | ✓ |
+| AC-27 | Database unavailable on "Check" gives an error and retry, with no result or "Export" | | ✓ | ✓ | |
 | AC-30 | `0853` service type is blank, and the word `Blank` doesn't appear | | | ✓ | ✓ |
 | AC-31 | `9998` shows blank catalogue details and required 6 | ✓ | ✓ | | ✓ |
 | AC-32 | `9998` and `0334` together give required 16 | ✓ | | | ✓ |
@@ -179,13 +179,12 @@ Blocked updates and deletes can report success while changing no rows, so these 
 
 | Failure | Method | Level |
 | --- | --- | --- |
-| Database unavailable on load or "Check" | The test app reaches Supabase through a small test proxy, and the test closes the proxy | E2E |
 | Database unavailable in `runCheck` logic | Point the data module at an unreachable URL | Integration |
 | Connection lost after a check | Playwright sets the browser offline before clicking "Export" | E2E |
 | Failure states on screen | Pass an `unavailable` result to the component | Component |
 | Bad seed data | Run the script on invalid fixture files | Integration |
 
-No test-only switches are added to production code. The proxy is test code only, and the app simply sees a different Supabase URL.
+No test-only switches are added to production code. Browser tests don't simulate a database outage, because that would need a test proxy, which is more than this slice justifies. The component and integration tests cover those failures, so the real page's retry after an outage has no browser test.
 
 ## 8. Order of work
 
