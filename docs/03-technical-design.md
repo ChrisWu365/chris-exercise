@@ -176,7 +176,7 @@ This example is the AC-06 case, using two real catalogue codes with invented mat
 
 - **Single source:** tables, constraints and RLS policies change only through timestamped SQL files in `supabase/migrations`, applied with the Supabase CLI.
 - **Forward fixes only:** applied files are never edited. Each migration must stay compatible with the running app.
-- **CI checks:** CI rebuilds a throwaway database from every migration. Before deploying, it fails if the production schema has drifted from the migration history.
+- **CI checks:** CI rebuilds a throwaway database from every migration. Before deploying, it applies new migrations and then fails if the production schema differs from them. The check comes second because any migration not yet applied would otherwise look like drift.
 - **Applying migrations:** the owner applies them to the local project with the Supabase CLI. CI applies them to the production project.
 - **Data kept separate:** migrations hold structure only. Data comes from `scripts/seed.ts`.
 
@@ -286,8 +286,8 @@ Pages are rendered dynamically without caching, so a failed request is never ser
 
 | Trigger | Steps |
 | --- | --- |
-| Every pull request and push | `npm ci`, lint, type-check, unit tests, build, then rebuild a throwaway Supabase from migrations, seed it, and run integration and end-to-end tests |
-| Push to `main`, after those pass | Check the production schema for drift, apply new migrations to it, deploy with the Vercel CLI, then smoke-test the public URL |
+| Every pull request and push | `npm ci`, lint, type-check, unit tests, rebuild a throwaway Supabase from migrations, build, check browser files, seed, and run integration and end-to-end tests |
+| Push to `main`, after those pass | Apply new migrations to production, check it for drift, deploy with the Vercel CLI, then smoke-test the public URL |
 
 - **Gate:** Vercel's automatic Git deployments are turned off, so nothing reaches production without passing CI.
 - **Seeding is manual:** if a change needs new data, the owner runs the seed script against each project. CI never holds either project's `service_role` key.

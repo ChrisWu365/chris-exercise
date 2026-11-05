@@ -207,10 +207,11 @@ Project and test setup comes first, because a failing test needs something to ru
 | --- | --- | --- |
 | Static | Lint, type-check, AC traceability script | The pipeline stops |
 | Fast tests | Unit and component | The pipeline stops |
-| Build | Production build, credential check on browser files | The pipeline stops |
-| Database | Rebuild throwaway Supabase from migrations, check for differences, seed | The pipeline stops |
+| Database | Rebuild throwaway Supabase from migrations, check for differences | The pipeline stops |
+| Build | Production build using the throwaway database's values, credential check on browser files | The pipeline stops |
+| Seed | Seed the throwaway database | The pipeline stops |
 | Slow tests | Integration and end-to-end, with the Playwright report and failure traces saved as artifacts | The pipeline stops |
-| Before deploying (`main` only) | Production schema drift check, then migrations | Nothing is deployed |
+| Before deploying (`main` only) | Apply migrations to production, then check it for drift | Nothing is deployed |
 | After deploying (`main` only) | Smoke test | The run fails and needs attention |
 
 **The smoke test** loads the dashboard, ticks a package, clicks "Check", checks that a status and the notices appear, and exports the CSV. This can't change anything, because the app has no write access. It does need seeded data, so the owner must seed the production project before the first deployment.
