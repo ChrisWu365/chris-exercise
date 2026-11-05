@@ -1,0 +1,7 @@
+{
+  "label": "SAMPLE DATA: invented for this exercise",
+  "work_packages": [
+    { "id": "pkg-a", "name": "SAMPLE Package A", "site": "SAMPLE Site North", "crew": "SAMPLE Crew 1", "start_offset_days": 2 },
+    { "id": "pkg-b", "name": "SAMPLE Package B", "site": "SAMPLE Site South", "crew": "SAMPLE Crew 2", "start_offset_days": 5 }
+  ]
+}
