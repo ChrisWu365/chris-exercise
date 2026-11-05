@@ -3,12 +3,23 @@
 // ci uses the throwaway database's disposable keys, already in the environment.
 import { readFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { parseSeedInput } from "./seed-input.ts";
 
 const envFiles: Record<string, string | null> = {
   local: ".env.seed.local.local",
   production: ".env.seed.production.local",
   ci: null,
 };
+
+// In the order they are written; removals run in reverse, because of foreign keys.
+const tables: [string, string[]][] = [
+  ["solutions", ["internal_code"]],
+  ["products", ["id"]],
+  ["solution_products", ["internal_code", "product_id"]],
+  ["work_packages", ["id"]],
+  ["planned_installations", ["id"]],
+  ["stock", ["product_id"]],
+];
 
 function fail(message: string): never {
   console.error(`Seed aborted, nothing written: ${message}`);
@@ -25,24 +36,33 @@ if (envFile) process.loadEnvFile(envFile);
 const { SUPABASE_URL: url, SUPABASE_SERVICE_ROLE_KEY: key } = process.env;
 if (!url || !key) fail("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set");
 
+const csvText = readFileSync("data/source/solutions-excerpt.csv", "utf8");
 const sample = JSON.parse(readFileSync("data/sample/sample-data.json", "utf8"));
-const rows = sample.work_packages;
-if (!String(sample.label).startsWith("SAMPLE DATA")) fail("the file must be labelled SAMPLE DATA");
-if (!Array.isArray(rows) || rows.length === 0) fail("work_packages must be a non-empty list");
-if (new Set(rows.map((row) => row.id)).size !== rows.length) fail("work package IDs must be unique");
-for (const row of rows) {
-  const textValid = [row.id, row.name, row.site, row.crew].every((v) => typeof v === "string" && v);
-  if (!textValid || !Number.isInteger(row.start_offset_days)) {
-    fail(`work package ${JSON.stringify(row.id)} has a missing or invalid value`);
+const result = parseSeedInput(csvText, sample);
+if (!result.ok) fail(`\n${result.errors.join("\n")}`);
+for (const warning of result.warnings) console.warn(`Warning: ${warning}`);
+
+const client = createClient(url, key, { auth: { persistSession: false } });
+
+function check(error: { message: string } | null, action: string, table: string) {
+  if (error) throw new Error(`Seed failed to ${action} ${table}: ${error.message}. Rerun it.`);
+}
+
+for (const [table, primaryKey] of [...tables].reverse()) {
+  const wanted = new Set(result.rows[table].map((row) => primaryKey.map((column) => row[column]).join("|")));
+  const { data, error } = await client.from(table).select(primaryKey.join(","));
+  check(error, "read", table);
+  const existing = (data ?? []) as unknown as Record<string, unknown>[];
+  for (const row of existing) {
+    if (wanted.has(primaryKey.map((column) => row[column]).join("|"))) continue;
+    const removed = await client.from(table).delete().match(row);
+    check(removed.error, "remove stale rows from", table);
   }
 }
 
-const client = createClient(url, key, { auth: { persistSession: false } });
-const upserted = await client.from("work_packages").upsert(rows);
-if (upserted.error) throw new Error(`Seed failed: ${upserted.error.message}`);
-
-const idList = `(${rows.map((row) => `"${row.id}"`).join(",")})`;
-const removed = await client.from("work_packages").delete().not("id", "in", idList);
-if (removed.error) throw new Error(`Seed failed: ${removed.error.message}`);
-
-console.log(`Seeded ${rows.length} work packages into the ${target} database.`);
+for (const [table] of tables) {
+  const { error } = await client.from(table).upsert(result.rows[table]);
+  check(error, "write", table);
+  console.log(`Seeded ${result.rows[table].length} rows into ${table}.`);
+}
+console.log(`Finished seeding the ${target} database.`);

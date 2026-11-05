@@ -193,7 +193,7 @@ This example is the AC-06 case, using two real catalogue codes with invented mat
 **Exact decimals.** `src/domain` follows the method in spec section 2:
 - `src/data` selects quantities with a text cast (`quantity_on_hand::text`), so they never become JavaScript numbers.
 - The SAMPLE JSON also stores quantities as strings, such as `"0.1"`, for the same reason.
-- Each string must match up to nine whole digits and three decimal places, or it is rejected. It is then held as a `BigInt` count of thousandths.
+- Each string is held as a `BigInt` count of thousandths. The `numeric(12,3)` column and the seed's checks already limit it to nine whole digits and three decimal places, so the calculation doesn't check this again.
 - This needs no new dependency, since `BigInt` is built into current browsers and Node.js.
 
 **Check rules, in order:**
@@ -286,14 +286,15 @@ Pages are rendered dynamically without caching, so a failed request is never ser
 
 | Trigger | Steps |
 | --- | --- |
-| Every pull request and push | `npm ci`, lint, type-check, unit tests, rebuild a throwaway Supabase from migrations, build, check browser files, seed, and run integration and end-to-end tests |
-| Push to `main`, after those pass | Apply new migrations to production, check it for drift, deploy with the Vercel CLI, then smoke-test the public URL |
+| Every push | `npm ci`, lint, type-check, unit tests, rebuild a throwaway Supabase from migrations, build, check browser files, seed, and run integration and end-to-end tests |
+| Push to `main`, after those pass | Apply new migrations to production, check it for drift, deploy with the Vercel CLI, then check the public URL responds. The fuller smoke test is switched off for now |
 
 - **Gate:** Vercel's automatic Git deployments are turned off, so nothing reaches production without passing CI.
 - **Seeding is manual:** if a change needs new data, the owner runs the seed script against each project. CI never holds either project's `service_role` key.
 - **Secrets:** the Supabase access token, production database password and Vercel token are GitHub Actions secrets. Runtime values are Vercel environment variables, pointing at the production project.
-- **Evidence:** the Actions run history and smoke-test step show each successful deployment.
-- **Diagnosis:** if the smoke test fails, the pipeline prints the site's server errors from Vercel's runtime logs, because the error page hides them.
+- **Evidence:** the Actions run history shows each deployment. With the smoke test off, a green deploy proves the site responds, not that its data is right.
+- **Control:** actions are pinned to commit SHAs and the runner to one image version. Each job has a time limit, and runs on `main` wait their turn, so deploys never overlap.
+- **Diagnosis:** if the live check or smoke test fails, the pipeline prints the site's server errors from Vercel's runtime logs, because the error page hides them.
 - **Environments:** one deployed environment is enough for the exercise. Real production use would add staging and a rollback procedure.
 
 ## 14. Main trade-offs

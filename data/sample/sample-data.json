@@ -1,7 +1,32 @@
 {
   "label": "SAMPLE DATA: invented for this exercise",
+  "products": [
+    { "id": "sealant-a", "name": "Sample Sealant A", "unit": "tube" },
+    { "id": "sealant-b", "name": "Sample Sealant B", "unit": "tube" },
+    { "id": "wrap-c", "name": "Sample Wrap C", "unit": "roll" }
+  ],
+  "solution_products": [
+    { "internal_code": "0334", "product_id": "sealant-a", "quantity_per_installation": "2" },
+    { "internal_code": "0335", "product_id": "sealant-a", "quantity_per_installation": "1" },
+    { "internal_code": "0853", "product_id": "sealant-b", "quantity_per_installation": "0.5" },
+    { "internal_code": "9998", "product_id": "sealant-a", "quantity_per_installation": "3" },
+    { "internal_code": "0344", "product_id": "wrap-c", "quantity_per_installation": "0.1" }
+  ],
   "work_packages": [
     { "id": "pkg-a", "name": "SAMPLE Package A", "site": "SAMPLE Site North", "crew": "SAMPLE Crew 1", "start_offset_days": 2 },
-    { "id": "pkg-b", "name": "SAMPLE Package B", "site": "SAMPLE Site South", "crew": "SAMPLE Crew 2", "start_offset_days": 5 }
+    { "id": "pkg-b", "name": "SAMPLE Package B", "site": "SAMPLE Site South", "crew": "SAMPLE Crew 2", "start_offset_days": 5 },
+    { "id": "pkg-c", "name": "SAMPLE Package C", "site": "SAMPLE Site East", "crew": "SAMPLE Crew 1", "start_offset_days": 9 }
+  ],
+  "planned_installations": [
+    { "id": "pi-01", "work_package_id": "pkg-a", "internal_code": "0334", "installation_count": 10 },
+    { "id": "pi-02", "work_package_id": "pkg-a", "internal_code": "0335", "installation_count": 5 },
+    { "id": "pi-03", "work_package_id": "pkg-b", "internal_code": "0853", "installation_count": 4 },
+    { "id": "pi-04", "work_package_id": "pkg-b", "internal_code": "9998", "installation_count": 2 },
+    { "id": "pi-05", "work_package_id": "pkg-c", "internal_code": "0344", "installation_count": 3 }
+  ],
+  "stock": [
+    { "product_id": "sealant-a", "quantity_on_hand": "20" },
+    { "product_id": "sealant-b", "quantity_on_hand": "50" },
+    { "product_id": "wrap-c", "quantity_on_hand": "0.3" }
   ]
 }

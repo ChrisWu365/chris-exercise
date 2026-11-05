@@ -123,6 +123,7 @@ These still need tests, because a requirement could otherwise pass unverified. T
 | --- | --- | --- |
 | FR-1: rows show all fields, with a stable order for shared start dates | Rendered row, and order across repeated loads | Component, Integration |
 | FR-4: dialog shows package details for each ticked package | Rendered dialog | Component |
+| FR-4: products appear in the stated order | Combined rows by earliest start date then product name, and each package's products by name | Unit |
 | FR-5: the CSV has every column, in order | Header row of the built file | Unit |
 | FR-6: the rest of the notices appear on the list and dialog | Sample data, projection, compliance and site readiness text | Component |
 | Accessibility: status has text, and the main flow works by keyboard | Tick, check, export and close using only the keyboard | Component, E2E |
@@ -212,9 +213,9 @@ Project and test setup comes first, because a failing test needs something to ru
 | Seed | Seed the throwaway database | The pipeline stops |
 | Slow tests | Integration and end-to-end, with the Playwright report and failure traces saved as artifacts | The pipeline stops |
 | Before deploying (`main` only) | Apply migrations to production, then check it for drift | Nothing is deployed |
-| After deploying (`main` only) | Smoke test | The run fails and needs attention |
+| After deploying (`main` only) | The public URL must respond; the fuller smoke test is switched off for now | The run fails and prints the site's server errors |
 
-**The smoke test** loads the dashboard, ticks a package, clicks "Check", checks that a status and the notices appear, and exports the CSV. This can't change anything, because the app has no write access. It does need seeded data, so the owner must seed the production project before the first deployment.
+**The smoke test is switched off for now, by the owner's decision.** The same browser test still runs in CI against the throwaway database. When turned back on, it loads the dashboard, ticks a package, clicks "Check", checks that a status and the notices appear, and exports the CSV. This can't change anything, because the app has no write access. It does need seeded data, so the owner must seed the production project before the first deployment.
 
 **Failed smoke tests don't roll back automatically.** Rollback would be a manual step in the exercise, and production would need a defined procedure.
 
