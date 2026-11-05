@@ -10,6 +10,13 @@ export function aucklandToday(now: Date): string {
   return aucklandDate.format(now);
 }
 
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export function formatDate(date: string): string {
+  const [year, month, day] = date.split("-");
+  return `${Number(day)} ${months[Number(month) - 1]} ${year}`;
+}
+
 export function addDays(date: string, days: number): string {
   const result = new Date(`${date}T00:00:00Z`);
   result.setUTCDate(result.getUTCDate() + days);

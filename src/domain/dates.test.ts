@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, aucklandToday } from "./dates";
+import { addDays, aucklandToday, formatDate } from "./dates";
 
 describe("Auckland dates", () => {
   it.each([
@@ -17,5 +17,13 @@ describe("Auckland dates", () => {
 
   it("adds days across the end of a year", () => {
     expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
+  });
+
+  it.each([
+    ["2026-11-08", "8 Nov 2026"],
+    ["2027-01-01", "1 Jan 2027"],
+    ["2026-12-31", "31 Dec 2026"],
+  ])("AC-04: %s is shown as %s", (date, expected) => {
+    expect(formatDate(date)).toBe(expected);
   });
 });

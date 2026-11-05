@@ -20,9 +20,9 @@ function clientReturning(status: number, body: unknown) {
 describe("Skeleton: listPackages", () => {
   it("reads work packages soonest first, with a stable order", async () => {
     const row = { id: "pkg-01", name: "SAMPLE Package A", site: "Site", crew: "Crew" };
-    const { client, fetchStub } = clientReturning(200, [row]);
+    const { client, fetchStub } = clientReturning(200, [{ ...row, start_offset_days: 2 }]);
 
-    await expect(listPackages(client)).resolves.toEqual([row]);
+    await expect(listPackages(client, "2026-11-06")).resolves.toEqual([{ ...row, start_date: "2026-11-08" }]);
 
     const url = new URL(String(fetchStub.mock.calls[0][0]));
     expect(url.pathname).toBe("/rest/v1/work_packages");
@@ -32,6 +32,6 @@ describe("Skeleton: listPackages", () => {
   it("throws when the database returns an error, rather than an empty list", async () => {
     const { client } = clientReturning(500, { message: "database unavailable" });
 
-    await expect(listPackages(client)).rejects.toThrow("database unavailable");
+    await expect(listPackages(client, "2026-11-06")).rejects.toThrow("database unavailable");
   });
 });

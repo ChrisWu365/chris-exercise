@@ -16,7 +16,7 @@ const solutionFor = async (packageId: string, code: string) => {
 
 describe("Data access", () => {
   it("AC-01: Package A, starting in 2 days, is listed above Package B, starting in 5", async () => {
-    const names = (await listPackages(client)).map((row) => row.name);
+    const names = (await listPackages(client, today)).map((row) => row.name);
     expect(names.slice(0, 2)).toEqual(["SAMPLE Package A", "SAMPLE Package B"]);
   });
 
