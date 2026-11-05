@@ -389,3 +389,15 @@ This log was not updated during that task because the prompt said not to change 
 > Error: Process completed with exit code 1.  github actions deployment fail with message above
 
 **Files read:** `.github/workflows/ci-cd.yml`. The agent also checked GitHub run history and setting names, and the Supabase CLI help for `db push` and `db diff`.
+
+
+### Prompt 38 (2026-11-06)
+> i have merge to main branch, but 'npx playwright install --with-deps chromium' in cr takes 12mins, why?
+
+**Files read:** None opened directly. The agent read the GitHub Actions logs and step timings for the recent runs, and listed variable names.
+
+
+### Prompt 39 (2026-11-06)
+> github actions cd failed: Run npx vercel@65.11.0 build --prod --token "$VERCEL_TOKEN" (followed by the Vercel CLI log, ending in `skip deploy` and `Error: [STATIC_BUILD_NO_OUT_DIR] No Output Directory named "public" found after the Build completed.`)
+
+The log text is shortened here. **Files read:** `vercel.json`. The agent also read GitHub run logs and ran two temporary checks on a branch it then deleted, using fake Vercel settings and no secrets.
