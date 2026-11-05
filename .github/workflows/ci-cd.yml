@@ -1,0 +1,95 @@
+name: CI/CD
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+      - name: Rebuild a throwaway Supabase from migrations
+        run: npx supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Fail if the database differs from the migrations
+        run: |
+          diff="$(npx supabase db diff --local --schema public)"
+          if [ -n "$diff" ]; then echo "$diff"; exit 1; fi
+      - name: Use the throwaway database's disposable keys
+        run: |
+          npx supabase status -o env > "$RUNNER_TEMP/status.env"
+          echo "Available names:" $(cut -d= -f1 "$RUNNER_TEMP/status.env")
+          set -a; . "$RUNNER_TEMP/status.env"; set +a
+          set -u
+          {
+            echo "SUPABASE_URL=$API_URL"
+            echo "SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+
+      - run: npm run build
+      - run: npm run check:browser-files
+      - run: npm run seed -- --target ci
+      - run: npm run test:integration
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+
+  deploy:
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      SMOKE_URL: ${{ vars.PRODUCTION_URL }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Apply new migrations to production
+        run: |
+          npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase db push --yes
+      - name: Fail if production has drifted from the migrations
+        run: |
+          diff="$(npx supabase db diff --linked --schema public)"
+          if [ -n "$diff" ]; then echo "$diff"; exit 1; fi
+
+      - run: npx vercel@65.11.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
+      - run: npx vercel@65.11.0 build --prod --token "$VERCEL_TOKEN"
+      - run: npx vercel@65.11.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
+
+      - name: Smoke-test the public URL
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: smoke-report
+          path: playwright-report
