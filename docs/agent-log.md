@@ -365,3 +365,27 @@ This log was not updated during that task because the prompt said not to change 
 > running checks and deploying through GitHub Actions.
 
 **Files read:** `README.md`, `.gitignore`, `tsconfig.json`, `supabase/.gitignore`. The agent also checked installed tools, GitHub secret names and package versions, and installed dependencies.
+
+### Prompt 35 (2026-11-06)
+> show me a plan to set up depoyment to deploy to dev, the GitHub secrets
+> and env vars I must create, and anything you need from me.
+
+**Files read:** None opened directly. The agent checked the GitHub plan, secret and variable names, branches and which env files exist, without reading `.env.local` or any values.
+
+### Prompt 36 (2026-11-06)
+> Invalid access token format. Must be like `sbp_0102...1920`. when running npx supabase link --project-ref <ref> with real access token
+
+**Files read:** `.env.local` and `.gitignore`-covered env files were checked by a script for variable names and the token's prefix and length only, with no values displayed. The agent also ran the Supabase CLI with fake tokens in a temporary folder.
+
+### Prompt 37 (2026-11-06)
+> 7s
+> Run npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+> Target: project xxx
+> Finished supabase link.
+> Target: local stack (127.0.0.1:54322) · default; pass --remote for xxx(xxxx)
+> failed to connect to postgres: failed to connect to `host=127.0.0.1 user=postgres database=xxx`: dial error (connect ECONNREFUSED 127.0.0.1:54322)
+> Make sure Docker is running, then run: supabase start
+> To use the linked project instead, pass --remote.
+> Error: Process completed with exit code 1.  github actions deployment fail with message above
+
+**Files read:** `.github/workflows/ci-cd.yml`. The agent also checked GitHub run history and setting names, and the Supabase CLI help for `db push` and `db diff`.

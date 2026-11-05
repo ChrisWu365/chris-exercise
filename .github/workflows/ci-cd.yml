@@ -71,13 +71,21 @@ jobs:
           cache: npm
       - run: npm ci
 
+      - name: Stop before changing anything if a setting is missing
+        run: |
+          missing=0
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID SUPABASE_PROJECT_REF SMOKE_URL; do
+            if [ -z "${!name}" ]; then echo "Missing setting for $name"; missing=1; fi
+          done
+          exit "$missing"
+
       - name: Apply new migrations to production
         run: |
           npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          npx supabase db push --yes
+          npx supabase db push --remote --yes
       - name: Fail if production has drifted from the migrations
         run: |
-          diff="$(npx supabase db diff --linked --schema public)"
+          diff="$(npx supabase db diff --remote --schema public)"
           if [ -n "$diff" ]; then echo "$diff"; exit 1; fi
 
       - run: npx vercel@65.11.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
