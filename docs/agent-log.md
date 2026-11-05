@@ -407,3 +407,39 @@ The log text is shortened here. **Files read:** `vercel.json`. The agent also re
 > 1. just keep it now 2. yes, pin ESLint to 9.39.5? 3. I'll pr to main manually
 
 **Files read:** None opened directly. The agent changed `package.json` and `package-lock.json`, and read GitHub run logs.
+
+
+### Prompt 41 (2026-11-06)
+> cd failed with error:  playwright test (followed by the Playwright log: both desktop and phone runs failed because the "Planned work packages" heading wasn't visible on the deployed site)
+
+The log text is shortened here. **Files read:** None opened directly. The agent fetched the public site, read GitHub run logs, and tested failure causes on a local server with fake values.
+
+
+### Prompt 42 (2026-11-06)
+> the log file is on github actions cd server
+
+**Files read:** None opened directly. The agent searched the GitHub Actions log and Playwright report, and ran two read-only temporary workflows on branches it then deleted: one tried to read Vercel runtime logs (`Forbidden`), the other listed Vercel variable names without values.
+
+
+### Prompt 43 (2026-11-06)
+> it is being deployed, I will give you log when It appear. as the cd process is done. Now please check if you have introduce tech stacks or compotents not assigned by the brief, why
+
+**Files read:** `package.json`, `package-lock.json`, `.github/workflows/ci-cd.yml`, and imports across the code. The brief was read earlier in this session.
+
+
+### Prompt 44 (2026-11-06)
+> Chrome Headless Shell 156.0.8078.4 ... downloaded ... (followed by the same Playwright smoke test log as before) cd failed with this log
+
+The log text is shortened here. **Files read:** `.env.local` was checked by a script for variable names and value shape only, and used to run the app locally. The agent also ran a temporary build check with fake values on a branch it then deleted.
+
+
+### Prompt 45 (2026-11-06)
+> .env.production.local is there
+
+**Files read:** `.env.production.local` was read by a script to run the app and call the production database, printing only value types, status codes and error text.
+
+
+### Prompt 46 (2026-11-06)
+> yes
+
+The user approved a small PR pinning Node to `24.x`. **Files read:** `package.json`.
