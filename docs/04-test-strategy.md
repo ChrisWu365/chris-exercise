@@ -212,9 +212,9 @@ Project and test setup comes first, because a failing test needs something to ru
 | Seed | Seed the throwaway database | The pipeline stops |
 | Slow tests | Integration and end-to-end, with the Playwright report and failure traces saved as artifacts | The pipeline stops |
 | Before deploying (`main` only) | Apply migrations to production, then check it for drift | Nothing is deployed |
-| After deploying (`main` only) | Smoke test | The run fails and needs attention |
+| After deploying (`main` only) | The public URL must respond; the fuller smoke test is switched off for now | The run fails and prints the site's server errors |
 
-**The smoke test** loads the dashboard, ticks a package, clicks "Check", checks that a status and the notices appear, and exports the CSV. This can't change anything, because the app has no write access. It does need seeded data, so the owner must seed the production project before the first deployment.
+**The smoke test is switched off for now, by the owner's decision.** The same browser test still runs in CI against the throwaway database. When turned back on, it loads the dashboard, ticks a package, clicks "Check", checks that a status and the notices appear, and exports the CSV. This can't change anything, because the app has no write access. It does need seeded data, so the owner must seed the production project before the first deployment.
 
 **Failed smoke tests don't roll back automatically.** Rollback would be a manual step in the exercise, and production would need a defined procedure.
 

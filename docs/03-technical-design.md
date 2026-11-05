@@ -286,14 +286,15 @@ Pages are rendered dynamically without caching, so a failed request is never ser
 
 | Trigger | Steps |
 | --- | --- |
-| Every pull request and push | `npm ci`, lint, type-check, unit tests, rebuild a throwaway Supabase from migrations, build, check browser files, seed, and run integration and end-to-end tests |
-| Push to `main`, after those pass | Apply new migrations to production, check it for drift, deploy with the Vercel CLI, then smoke-test the public URL |
+| Every push | `npm ci`, lint, type-check, unit tests, rebuild a throwaway Supabase from migrations, build, check browser files, seed, and run integration and end-to-end tests |
+| Push to `main`, after those pass | Apply new migrations to production, check it for drift, deploy with the Vercel CLI, then check the public URL responds. The fuller smoke test is switched off for now |
 
 - **Gate:** Vercel's automatic Git deployments are turned off, so nothing reaches production without passing CI.
 - **Seeding is manual:** if a change needs new data, the owner runs the seed script against each project. CI never holds either project's `service_role` key.
 - **Secrets:** the Supabase access token, production database password and Vercel token are GitHub Actions secrets. Runtime values are Vercel environment variables, pointing at the production project.
-- **Evidence:** the Actions run history and smoke-test step show each successful deployment.
-- **Diagnosis:** if the smoke test fails, the pipeline prints the site's server errors from Vercel's runtime logs, because the error page hides them.
+- **Evidence:** the Actions run history shows each deployment. With the smoke test off, a green deploy proves the site responds, not that its data is right.
+- **Control:** actions are pinned to commit SHAs and the runner to one image version. Each job has a time limit, and runs on `main` wait their turn, so deploys never overlap.
+- **Diagnosis:** if the live check or smoke test fails, the pipeline prints the site's server errors from Vercel's runtime logs, because the error page hides them.
 - **Environments:** one deployed environment is enough for the exercise. Real production use would add staging and a rollback procedure.
 
 ## 14. Main trade-offs
