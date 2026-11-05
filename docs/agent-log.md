@@ -172,6 +172,12 @@ This log tracks how the coding agent (Claude Code) was directed and corrected du
 - **Decision:** The agent reversed its own suggestion after install, and pins the version in one workflow variable instead.
 - **Reason:** It added 254 packages and took the audit to 45 vulnerabilities, including 1 critical.
 
+### 2026-11-06: Order of products in the combined result, and a quantity guard
+- **Task:** Calculate the combined result that team leaders read to see which materials fall short across their ticked packages.
+- **Agent suggested:** List `Short` products first, then by product name; and remove the design's check that rejects badly formed quantities, or else add a test and a small guard.
+- **Decision:** Order by start time, then product name, not by status. No guard, and the design line was changed to match.
+- **Reason:** The user said `numeric(12,3)` can hold the values and not to overengineer. No reason was given for the order.
+
 ## Prompts and files read
 
 Prompts are verbatim.
@@ -491,3 +497,23 @@ The agent took this as the next planned task, Task 1 (schema, RLS and seed), and
 > 1. yes 2. yes, what earlier questions, please do it on the current branch, do not switch before asked
 
 **Files read:** `.github/workflows/ci-cd.yml`, `scripts/seed.ts`, `data/sample/sample-data.json`. The agent applied the CI changes and implemented Task 1 on `feature/walking-skeleton`.
+
+
+### Prompt 53 (2026-11-06)
+> 1. no 2. yes
+
+The user declined requiring `checks` to merge into `main` (no reason given) and approved starting Task 2.
+
+**Files read:** `docs/02-slice-spec.md`, `docs/03-technical-design.md`, `docs/04-test-strategy.md`, `package.json`. The agent wrote the Task 2 tests and stopped for review.
+
+
+### Prompt 54 (2026-11-06)
+> 1. order by start time and alphabet or product name 2.numeric(12,3) can hold, don't overengineering 3. yes
+
+**Files read:** `docs/agent-log.md`. The agent added ordering tests, implemented Task 2 and updated the spec, design and test strategy.
+
+
+### Prompt 55 (2026-11-06)
+> 1. yes 2. commit now. Use conventional commit format, one concern per commit
+
+**Files read:** none. The agent committed Task 2.
