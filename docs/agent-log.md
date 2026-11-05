@@ -576,4 +576,32 @@ The user declined requiring `checks` to merge into `main` (no reason given) and 
 ### Prompt 65 (2026-11-06)
 > yes
 
-**Files read:** none. The agent committed and pushed Task 6 so CI could run its browser and check logic tests.
+**Files read:** none. The agent committed and pushed Task 6 so CI could run its browser and check logic tests. CI failed on a test's time limit, and the agent stopped to ask.
+
+
+### Prompt 66 (2026-11-06)
+> yes
+
+The user approved a 15-second limit on the AC-27 logic test, with its assertions unchanged, so the Supabase client's retries can finish. The agent then wrote the Task 7 tests and stopped for review.
+
+**Files read:** none.
+
+
+### Prompt 67 (2026-11-06)
+> yes
+
+**Files read:** none. The agent connected "Export" to the CSV builder for Task 7.
+
+
+### Prompt 68 (2026-11-06)
+> yes
+
+**Files read:** `README.md`, `.github/workflows/ci-cd.yml`, `docs/04-test-strategy.md`, `scripts/check-browser-files.ts`. The agent committed and pushed Task 7 so CI could run its browser tests, then did the reduced Task 8: a script that fails if a criterion has no test, and the README's pipeline gaps.
+
+
+### Prompt 69 (2026-11-06)
+> 1.  yes 2. ok 3. no, remove deploy from dev logic, deploy from main only
+
+The user confirmed `main` is the only deployment branch, and approved removing two unbuilt items from the test strategy.
+
+**Files read:** `.github/workflows/ci-cd.yml`. The agent committed and pushed Task 8. The workflow already deployed from `main` only, so no logic needed removing.

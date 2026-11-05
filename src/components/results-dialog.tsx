@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import type { CheckSuccess, CombinedRow, PackageResult } from "../domain/check";
+import { buildCsv } from "../domain/csv";
 import { formatDate } from "../domain/dates";
 import { ResultNotices, SampleDataNotice } from "./notices";
 import styles from "./tables.module.css";
@@ -76,6 +77,16 @@ function PackageDetail({ workPackage, products }: { workPackage: PackageResult; 
   );
 }
 
+/** Works with no connection, because it uses only the result already in the dialog. */
+function downloadCsv(result: CheckSuccess) {
+  const url = URL.createObjectURL(new Blob([buildCsv(result, new Date())], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "material-check.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export function ResultsDialog({ result, onClose }: { result: CheckSuccess; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -107,7 +118,9 @@ export function ResultsDialog({ result, onClose }: { result: CheckSuccess; onClo
         <PackageDetail key={workPackage.id} workPackage={workPackage} products={products} />
       ))}
       <div className={styles.actions}>
-        <button type="button">Export</button>
+        <button type="button" onClick={() => downloadCsv(result)}>
+          Export
+        </button>
         <button type="button" onClick={onClose}>
           Close
         </button>

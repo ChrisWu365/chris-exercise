@@ -27,6 +27,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run check:ac-coverage
       - run: npm test
 
       - name: Rebuild a throwaway Supabase from migrations

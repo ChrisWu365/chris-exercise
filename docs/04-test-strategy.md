@@ -133,8 +133,7 @@ These still need tests, because a requirement could otherwise pass unverified. T
 | Design section 8: quantities reach the rules as text | `src/data` returns strings for `numeric` columns | Integration |
 | Security: database access matches the design | See below | Integration |
 | Security: no credentials in browser code | Search the built browser files for the Supabase URL and key values, and for `service_role` | Pipeline |
-| Runtime reads only from Supabase | `src` doesn't import from `data/`, and the build doesn't bundle those files | Pipeline |
-| Diagnostics: load and check failures are logged | Spy on the logger during a failed read | Integration |
+| Diagnostics: check failures are logged | Spy on the logger during a failed read | Integration |
 | Database as Code: schema comes only from migrations | Rebuild from empty, and check for differences | Pipeline |
 
 **RLS tests** use the anon key against the rebuilt database, for `solutions`, `products`, `solution_products`, `work_packages`, `planned_installations` and `stock`:
