@@ -2,6 +2,40 @@
 
 This log tracks how the coding agent (Claude Code) was directed and corrected during the exercise. It records the user's prompts, the files the agent read, and each correction or rejection. It does not record the agent's system prompt or its full replies. The user checks each correction entry.
 
+## Table of contents
+
+- [Corrections and rejections](#corrections-and-rejections)
+  - [2026-11-04: Unrequested date and stock-age rules in the readiness check](#2026-11-04-unrequested-date-and-stock-age-rules-in-the-readiness-check)
+  - [2026-11-04: Pagination of the team leader's package list](#2026-11-04-pagination-of-the-team-leaders-package-list)
+  - [2026-11-04: Readiness totals versus a current-page statement](#2026-11-04-readiness-totals-versus-a-current-page-statement)
+  - [2026-11-04: Hiring company's name in project documents](#2026-11-04-hiring-companys-name-in-project-documents)
+  - [2026-11-04: Agent log entries without business context](#2026-11-04-agent-log-entries-without-business-context)
+  - [2026-11-05: How the slice fits the existing stack and apps](#2026-11-05-how-the-slice-fits-the-existing-stack-and-apps)
+  - [2026-11-05: Clarity of the interfaces and data model](#2026-11-05-clarity-of-the-interfaces-and-data-model)
+  - [2026-11-05: Ambiguous wording and the meaning of `Unknown`](#2026-11-05-ambiguous-wording-and-the-meaning-of-unknown)
+  - [2026-11-05: Database changes managed as code](#2026-11-05-database-changes-managed-as-code)
+  - [2026-11-05: Demo decisions listed as open decisions](#2026-11-05-demo-decisions-listed-as-open-decisions)
+  - [2026-11-05: Sample ID types and JSONB limits for production](#2026-11-05-sample-id-types-and-jsonb-limits-for-production)
+  - [2026-11-05: What "unenforced" means for `internal_code`](#2026-11-05-what-unenforced-means-for-internal_code)
+  - [2026-11-05: Time zone for the demo's current date](#2026-11-05-time-zone-for-the-demos-current-date)
+  - [2026-11-05: Replacing the recorded escalation with a CSV export](#2026-11-05-replacing-the-recorded-escalation-with-a-csv-export)
+  - [2026-11-05: Acceptance criteria format](#2026-11-05-acceptance-criteria-format)
+  - [2026-11-05: Check flow, combined result, `Unknown` and data model](#2026-11-05-check-flow-combined-result-unknown-and-data-model)
+  - [2026-11-05: Review of the rewritten spec's check and catalogue rules](#2026-11-05-review-of-the-rewritten-specs-check-and-catalogue-rules)
+  - [2026-11-05: Where seeding runs and what "one file each round" covers](#2026-11-05-where-seeding-runs-and-what-one-file-each-round-covers)
+  - [2026-11-05: Supabase projects and the shortfall for `Available`](#2026-11-05-supabase-projects-and-the-shortfall-for-available)
+  - [2026-11-06: Link from planned installations to solution products](#2026-11-06-link-from-planned-installations-to-solution-products)
+  - [2026-11-06: Foreign key from solution products to solutions](#2026-11-06-foreign-key-from-solution-products-to-solutions)
+  - [2026-11-06: No foreign keys to `solutions`, and the seed's mistyped code check](#2026-11-06-no-foreign-keys-to-solutions-and-the-seeds-mistyped-code-check)
+  - [2026-11-06: Every planned installation must have solution products](#2026-11-06-every-planned-installation-must-have-solution-products)
+  - [2026-11-06: `solution_codes` table rejected](#2026-11-06-solution_codes-table-rejected)
+  - [2026-11-06: Invalid quantities listed as calculation examples](#2026-11-06-invalid-quantities-listed-as-calculation-examples)
+  - [2026-11-06: A planned code can't have no products](#2026-11-06-a-planned-code-cant-have-no-products)
+  - [2026-11-06: Smoke test switched off](#2026-11-06-smoke-test-switched-off)
+  - [2026-11-06: Vercel CLI as a dev dependency](#2026-11-06-vercel-cli-as-a-dev-dependency)
+  - [2026-11-06: Order of products in the combined result, and a quantity guard](#2026-11-06-order-of-products-in-the-combined-result-and-a-quantity-guard)
+- [Prompts and files read](#prompts-and-files-read)
+
 ## Corrections and rejections
 
 ### 2026-11-04: Unrequested date and stock-age rules in the readiness check
@@ -605,3 +639,72 @@ The user approved a 15-second limit on the AC-27 logic test, with its assertions
 The user confirmed `main` is the only deployment branch, and approved removing two unbuilt items from the test strategy.
 
 **Files read:** `.github/workflows/ci-cd.yml`. The agent committed and pushed Task 8. The workflow already deployed from `main` only, so no logic needed removing.
+
+
+### Prompt 70 (2026-11-06)
+> 1. I find nothing to merge from skeleton to main now. 2. ok, 3. ok. 4. ok
+
+**Files read:** none. The agent confirmed PR #15 had already merged, watched the deploy succeed and found the live page unseeded.
+
+
+### Prompt 71 (2026-11-06)
+> I have deploy main, but can only see 'Planned work packages
+> Packages, material mappings and stock are SAMPLE data.
+>
+> No planned work packages' on the page
+
+**Files read:** the project address in each `.env` file, compared without printing it. Production has no seed file yet, and `.env.local` and `.env.seed.local.local` both point at production. The agent had called `.env.local` the local project, so its read-only test runs in this session were against production.
+
+
+### Prompt 72 (2026-11-06)
+> npm run seed -- --target production, which failed with: new row violates row-level security policy for table "solutions"
+
+**Files read:** the type of each Supabase key in the `.env` files, without printing the keys.
+
+
+### Prompt 73 (2026-11-06)
+> the SUPABASE_SERVICE_ROLE_KEY are located in Secret keys on API Keys page now, now there are package datas on vercel. Please read the brief document and update README file so that the reviewer can have a clear guidance of what to do in each step. Then we will go over the submissions one by one
+
+**Files read:** `docs/brief/take-home-brief.pdf`, `README.md`, `docs/01-iteration-plan.md`, `docs/03-technical-design.md`. The agent ran the browser tests against the live site and rewrote the README.
+
+
+### Prompt 74 (2026-11-06)
+> I have added some screenshots in the .github/assets/pics folder, please insert them in proper places in README
+
+**Files read:** the five screenshots in `.github/assets/pics`. The agent placed them in the README.
+
+
+### Prompt 75 (2026-11-06)
+> add content of table for readme and agent-log.md
+
+**Files read:** `README.md`, `docs/agent-log.md`. The agent added a table of contents to each.
+
+
+### Prompt 76 (2026-11-06)
+> My agentic coding approach: [the account, kept in `docs/05-agentic-coding-approach.md`] Above is my short account of your agentic coding approach. Please create an md file in the docs folder and reorganize the sentences. reorganize only, do not change my wordings unless permitted
+
+**Files read:** none. The agent created `docs/05-agentic-coding-approach.md`, reordering the sentences and adding headings.
+
+
+### Prompt 77 (2026-11-06)
+> Ok, include the new md file in readme, and move on to write a How to review this md file. make sure it's Concise, but not overengineering, keep it simple, which is better to review
+
+**Files read:** `README.md`. The agent created `docs/00-how-to-review.md` and linked it and the agentic coding approach from the README.
+
+
+### Prompt 78 (2026-11-06)
+> readme file has a file conflict just now, please check again. add file structure in the readme file
+
+**Files read:** `README.md`. The agent found no conflict markers, restored the top table's header row and added the file structure.
+
+
+### Prompt 79 (2026-11-06)
+> restore the ci/cd row please. and then write an submission md file, to mark/link file locations for each requirement, and include it in readme
+
+**Files read:** `docs/02-slice-spec.md`, `docs/04-test-strategy.md`. The agent restored the CI/CD row, created `docs/06-submission.md` and linked it from the README.
+
+
+### Prompt 80 (2026-11-06)
+> commit first
+
+**Files read:** none. The agent committed the README, screenshots, review guide, agentic coding approach, submission list and agent log.
