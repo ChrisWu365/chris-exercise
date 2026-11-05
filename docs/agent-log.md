@@ -443,3 +443,15 @@ The log text is shortened here. **Files read:** `.env.local` was checked by a sc
 > yes
 
 The user approved a small PR pinning Node to `24.x`. **Files read:** `package.json`.
+
+
+### Prompt 47 (2026-11-06)
+> after merging to main, cd still fail with: > playwright test (followed by the same Playwright smoke test log as before)
+
+The log text is shortened here. **Files read:** `.env.production.local` was read by a script to count production rows. The agent also ran a temporary read-only workflow on a branch it then deleted, which read Vercel variable metadata and runtime logs through the Vercel API.
+
+
+### Prompt 48 (2026-11-06)
+> yes
+
+The user approved printing Vercel's runtime errors in the deploy job when the smoke test fails. **Files read:** `.github/workflows/ci-cd.yml`. The agent tested the new step against the live site on a temporary branch it then deleted.
