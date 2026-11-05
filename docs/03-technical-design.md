@@ -46,7 +46,7 @@ flowchart LR
 | On hand | The stock quantity currently recorded for a product. It may differ from what is physically there. |
 | Check | The calculation run when the team leader clicks "Check", for the ticked packages. |
 | Combined result | Each product's total required quantity across the checked packages, compared once with on hand. |
-| Missing catalogue match | A planned installation whose code isn't in `solutions`. Its details stay blank, and any mapped products still count. A warning appears only if it has no mapped products either. |
+| Missing catalogue match | A planned installation whose code isn't in `solutions`. Its details stay blank, and its mapped products still count. |
 | CSV snapshot | The file exported from the dialog. It isn't an audit record. |
 | Current date | Today's date in Auckland (`Pacific/Auckland`), whatever time zone the server runs in. |
 
@@ -70,7 +70,7 @@ The combined result is a **projection**: a read-only comparison that answers "wo
 
 1. **Open the dashboard (`/`).** All planned work packages appear soonest first, each with a tick box, name, site, start date and crew. The dashboard never shows a status, and a SAMPLE data notice is always visible.
 2. **Tick packages and click "Check".** "Check" is disabled until a package is ticked. Clicking it reads current stock.
-3. **Read the dialog.** Any warning about missing catalogue and product details comes first, then the combined result, the notices, and the detail for each package. Reading a shortage answers the slice's decision: can this crew go ahead, or do stakeholders need telling?
+3. **Read the dialog.** The combined result comes first, then the notices, and the detail for each package. Reading a shortage answers the slice's decision: can this crew go ahead, or do stakeholders need telling?
 4. **Click "Export".** The browser saves the CSV with no further server request.
 5. **Act outside the system.** The team leader shares the file and reschedules crews if needed. Closing the dialog returns to the dashboard with the ticks kept. A later check reads stock again.
 
@@ -97,7 +97,7 @@ supabase/migrations/     versioned schema and RLS policies
 | `runCheck` server action | Ticked package IDs | `ok` with the check result, `invalid_selection`, or `unavailable` |
 | `listPackages(today)` in `src/data` | Current date | Packages ordered by `start_offset_days`, then `id` |
 | `getCheckInputs(packageIds)` in `src/data` | Package IDs | Installations, matching solutions, solution products and stock |
-| `checkPackages(input)` in `src/domain` | Those inputs | Combined rows, per-package detail and a missing-details flag, with quantities as decimal strings |
+| `checkPackages(input)` in `src/domain` | Those inputs | Combined rows and per-package detail, with quantities as decimal strings |
 | `buildCsv(result, exportedAt)` in `src/domain` | Check result and export time | CSV text, built in the browser (FR-5) |
 
 The check result crosses to the browser with quantities as decimal strings, because `BigInt` can't be sent as JSON. The dialog and CSV display those strings without further arithmetic. A later "Export" uses that same result, so the file matches the dialog even if the connection is lost (AC-24).
@@ -166,8 +166,8 @@ This example is the AC-06 case, using two real catalogue codes with invented mat
 ### Key design points
 
 - **Direct link to products:** `planned_installations` joins `solution_products` on `internal_code`, so finding products doesn't depend on a row in `solutions`.
-- **No foreign key to `solutions`:** a supplier may be removed from the business, and that mustn't affect existing `planned_installations` or `solution_products` rows. Their codes stay, their catalogue details become blank, and their mapped products still count towards demand. A code with no mapped products adds no demand, which is why the warning exists (FR-4).
-- **Consistency handled in code:** the seed script reports likely mistyped codes in `solution_products` but still writes them, because they look the same as codes from a removed supplier. It also enforces "every product has a stock row", which needs a check across tables (spec section 2).
+- **No foreign key to `solutions`:** a supplier may be removed from the business, and that mustn't affect existing `planned_installations` or `solution_products` rows. Their codes stay, their catalogue details become blank, and their mapped products still count towards demand.
+- **Consistency handled in code:** the seed script aborts if a planned installation has no mapped products, because `internal_code` isn't unique in `solution_products` and a foreign key can't point to it. It also enforces "every product has a stock row". It reports likely mistyped codes in `solution_products` but still writes them, because they look the same as codes from a removed supplier (spec section 2).
 - **`raw_row`:** JSONB holding the supplied values, kept for traceability and never queried.
 - **Sample IDs:** text IDs are for SAMPLE data only; production should use `bigint` or `uuid`.
 - **SAMPLE labelling:** table names carry no prefix, so the labels are in the seed file, the UI notice and the CSV `notice` column.
@@ -188,7 +188,7 @@ This example is the AC-06 case, using two real catalogue codes with invented mat
 | CSV columns, notice text, quoting and formula safety (FR-5) | `src/domain` |
 | Package order (FR-1) | `src/data` |
 | Completeness and valid values | Database constraints, and the seed script's checks before writing |
-| On-screen notices and warning text (FR-4, FR-6) | One module in `src/components`, so required wording is tested in one place |
+| On-screen notices (FR-6) | One module in `src/components`, so required wording is tested in one place |
 
 **Exact decimals.** `src/domain` follows the method in spec section 2:
 - `src/data` selects quantities with a text cast (`quantity_on_hand::text`), so they never become JavaScript numbers.
@@ -198,9 +198,8 @@ This example is the AC-06 case, using two real catalogue codes with invented mat
 
 **Check rules, in order:**
 1. Each installation adds (count × quantity per installation) for each of its mapped products, whether or not its code is in the catalogue. Totals are kept per product and per package.
-2. An installation whose code is in neither `solutions` nor `solution_products` adds nothing and sets the missing-details flag.
-3. Each product's combined total is compared once with on hand. `Short` shows required minus on hand. `Available` shows no shortfall: the dialog and the CSV leave it blank.
-4. Missing stock is never treated as zero. A product with no stock row, or a matched solution with no products, can't come from the seed, so if found it fails the check as `unavailable` and is logged.
+2. Each product's combined total is compared once with on hand. `Short` shows required minus on hand. `Available` shows no shortfall: the dialog and the CSV leave it blank.
+3. Missing data is never treated as zero. A product with no stock row, or a planned installation with no products, can't come from the seed, so if found it fails the check as `unavailable` and is logged.
 
 **CSV safety.** Values are quoted as standard CSV. Any text starting with `=`, `+`, `-` or `@` gets a leading apostrophe so it can't run as a spreadsheet formula.
 
@@ -319,5 +318,5 @@ These are the choices for the demo. Each should be discussed and redesigned for 
 | Topic | Choice for the demo | To resolve for real projects |
 | --- | --- | --- |
 | Current date | Auckland time, because the demo will be presented in Auckland. Daylight saving is handled, and viewers elsewhere still see Auckland dates | Which time zone applies to each site |
-| Missing catalogue match | Blank details, with mapped products still counted. A one-line warning appears if there are no mapped products, because required quantities may be understated | Whether planning records should be chosen from the catalogue, and how code keeps these links consistent |
+| Missing catalogue match | Blank details, with mapped products still counted | Whether planning records should be chosen from the catalogue, and how code keeps these links consistent |
 | Packages shown | Every visitor sees all SAMPLE packages | Each team leader sees their own packages, through sign-in |

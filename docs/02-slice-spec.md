@@ -40,7 +40,8 @@ The runtime store is Supabase, and deployed code reads only from Supabase, never
 | `planned_installations` | SAMPLE | `id` primary key; `work_package_id` foreign key; `internal_code` text with no foreign key; `installation_count` integer, greater than 0. All `NOT NULL` |
 | `stock` | SAMPLE | `product_id` primary and foreign key, so one stock row per product; `quantity_on_hand` `numeric(12,3)`, `NOT NULL`, 0 or more |
 
-- **Missing catalogue match:** `internal_code` has no foreign key to `solutions` in `planned_installations` or `solution_products`, so a code such as `9999` can be stored, and can still have mapped products. Removing a supplier's solutions from `solutions` therefore doesn't affect existing planned installations or solution products; their catalogue details just become blank (FR-4). The seed script checks these codes instead of the database.
+- **Missing catalogue match:** `internal_code` has no foreign key to `solutions` in `planned_installations` or `solution_products`, so a code such as `9998` can be stored without a catalogue row. Removing a supplier's solutions from `solutions` therefore doesn't affect existing planned installations or solution products; their catalogue details just become blank (FR-4).
+- **Planned installations always have products:** every planned installation must have at least one mapped product. `internal_code` isn't unique in `solution_products`, so a foreign key can't enforce this, and the seed script checks it instead.
 - **Sample IDs:** text IDs keep the SAMPLE data readable. Production should use `bigint` or `uuid` keys.
 - **Start dates:** a start date is the current date in Auckland plus `start_offset_days`, so packages stay in the future without reseeding.
 
@@ -63,7 +64,7 @@ An idempotent seed script validates both seed files and then writes to Supabase.
 
 - the CSV doesn't have 148 rows, or an `Internal Code` is missing or duplicated;
 - a value breaks a table constraint above;
-- a product has no stock row, a work package has no planned installations, or a planned installation whose solution is in the catalogue has no mapped products.
+- a product has no stock row, a work package has no planned installations, or a planned installation has no mapped products.
 
 A planned installation or solution product whose code isn't in the catalogue is allowed. If a `solution_products` code is in neither the catalogue nor any planned installation, the script reports it as a possible mistyped code and still writes it.
 
@@ -105,7 +106,7 @@ For example, 0.1 + 0.2 against stock of 0.3 is `Available`. JavaScript numbers w
 
 No priority applies between packages, because the check compares only the combined total.
 
-**FR-4 Results dialog.** The check opens a dialog. The combined result is at the top, with each product's required quantity, quantity on hand, shortfall and status. Below it, each selected package shows its planned installations (internal code, catalogue details and installation count) and its required quantity of each product. If a planned installation's code isn't in the catalogue, its catalogue details are left blank, and any mapped products are still calculated and counted in the combined result. If that code also has no mapped products, its product quantities are left blank too, and one line above the combined result says: `Some planned installations have no catalogue or product details, so required quantities may be understated.`
+**FR-4 Results dialog.** The check opens a dialog. The combined result is at the top, with each product's required quantity, quantity on hand, shortfall and status. Below it, each selected package shows its planned installations (internal code, catalogue details and installation count) and its required quantity of each product. If a planned installation's code isn't in the catalogue, its catalogue details are left blank, and its mapped products are still calculated and counted in the combined result.
 
 **FR-5 Export.** The dialog has an "Export" button, and it is the only place to export. It builds a CSV file in the browser from the data already in the dialog, with no further server request. The file has one row for each product in each selected package, including `Available` products:
 
@@ -118,8 +119,6 @@ No priority applies between packages, because the check compares only the combin
 | `combined_required`, `on_hand`, `combined_shortfall`, `status` | The combined result for this product, repeated on each of its rows. `combined_shortfall` is blank when `status` is `Available` |
 | `notice` | `SAMPLE DATA. Stock is not reserved. This is not a compliance statement.` |
 
-A planned installation whose code isn't in the catalogue and has no mapped products adds one row for its package, with the product and quantity columns left blank.
-
 **FR-6 Notices.** The list and dialog show that packages, material mappings and stock are SAMPLE data. The dialog also states that the result is a projection against recorded stock for the selected packages only, that stock is not reserved, that this is not a compliance statement, and that it covers materials only, not full site readiness.
 
 **FR-7 Failure and empty states.**
@@ -129,7 +128,7 @@ A planned installation whose code isn't in the catalogue and has no mapped produ
 
 ## 4. Acceptance criteria
 
-Each criterion maps to at least one automated test in the test strategy. Seeding and database access rules aren't team leader behaviour, so they are verified there too.
+Each criterion maps to at least one automated test in the test strategy. Seeding and database access rules aren't team leader behaviour, so they are verified there too. AC-15, AC-23, AC-28 and AC-29 have been retired, and their IDs won't be reused.
 
 **Package list**
 - **AC-01** Given SAMPLE Package A starts in 2 days and SAMPLE Package B starts in 5 days, when the team leader opens the dashboard, then SAMPLE Package A is listed above SAMPLE Package B.
@@ -150,11 +149,8 @@ Each criterion maps to at least one automated test in the test strategy. Seeding
 - **AC-12** Given SAMPLE Package A is checked, when the dialog opens, then the combined result appears above the package details.
 - **AC-13** Given SAMPLE Package A plans solution `0334`, when the dialog opens, then that row shows `0334`, `V1.11-22SFR00038-146-E`, `Wall`, `Copper Pipe`, `Ø100mm`, integrity `60` and insulation `-`.
 - **AC-14** Given SAMPLE Package A plans solution `0853`, when the dialog opens, then its substrate is shown as `Unlined Timber` with no trailing comma.
-- **AC-15** Given SAMPLE Package A plans solution `9999`, which isn't in the catalogue and has no mapped products, when the dialog opens, then that row shows `9999` with its catalogue details and product quantities blank.
 - **AC-16** Given SAMPLE Package A is checked, when the dialog opens, then it shows the text "Stock is not reserved".
 - **AC-17** Given a phone-width screen, when the dialog shows a shortage of Sample Sealant A, then the word `Short` is visible and "Export" can be reached.
-- **AC-28** Given SAMPLE Package A plans solution `9999`, which isn't in the catalogue and has no mapped products, when the dialog opens, then the line `Some planned installations have no catalogue or product details, so required quantities may be understated.` appears above the combined result.
-- **AC-29** Given SAMPLE Package A plans solution `9998`, which isn't in the catalogue but has mapped products, when the dialog opens, then the line `Some planned installations have no catalogue or product details, so required quantities may be understated.` doesn't appear.
 - **AC-31** Given SAMPLE Package A plans solution `9998`, which isn't in the catalogue, with 2 installations at 3 units of Sample Sealant A, when the dialog opens, then that row shows `9998` with its catalogue details blank and required 6 of Sample Sealant A.
 - **AC-32** Given SAMPLE Package A plans solution `9998`, which isn't in the catalogue, with 2 installations at 3 units of Sample Sealant A, and 5 installations at 2 units of solution `0334`, when it is checked, then the combined result shows required 16 of Sample Sealant A.
 - **AC-30** Given SAMPLE Package A plans solution `0853`, whose supplied `Service Type` is the word `Blank`, when the dialog opens, then its service type is shown blank and the word `Blank` doesn't appear.
@@ -165,7 +161,6 @@ Each criterion maps to at least one automated test in the test strategy. Seeding
 - **AC-20** Given Sample Sealant B is `Available`, when the result is exported, then the file has a row for Sample Sealant B with `status` `Available` and a blank `combined_shortfall`.
 - **AC-21** Given the export happens at 9:30 am on 5 Nov 2026 in Auckland, when the file is opened, then `exported_at` is `2026-11-05T09:30:00+13:00`.
 - **AC-22** Given any exported row, when the file is opened, then `notice` is `SAMPLE DATA. Stock is not reserved. This is not a compliance statement.`
-- **AC-23** Given SAMPLE Package A plans solution `9999`, which isn't in the catalogue and has no mapped products, when the result is exported, then the file has a row for SAMPLE Package A with blank product and quantity columns.
 - **AC-24** Given the dialog shows a result and the connection is then lost, when the team leader clicks "Export", then the file contains the values shown in the dialog.
 
 **Failures**
@@ -218,6 +213,6 @@ Each criterion maps to at least one automated test in the test strategy. Seeding
 **Known limitations:**
 - **Selected packages only:** the combined result ignores packages that aren't ticked, so unticked packages may need the same stock.
 - **No share of stock per package:** the combined result shows a product's total shortfall, not which package would go without.
-- **Missing catalogue match:** a code that isn't in the catalogue shows blank details, but its mapped products still count, and those mappings can't be checked against the catalogue. A code with no mapped products as well adds nothing, so totals can be understated and a product can still show `Available`. For that case, the dialog shows a one-line warning and the CSV shows a row with blank product and quantity columns.
+- **Missing catalogue match:** a code that isn't in the catalogue shows blank details, but its mapped products still count, and those mappings can't be checked against the catalogue. The CSV has no catalogue columns, so it shows no sign of this.
 - **Stock accuracy:** figures are taken as recorded, so out-of-date stock can look sufficient. The SAMPLE data has no source timestamp to show.
 - **Snapshot, not an audit record:** the CSV can be edited after export, and the system doesn't record that it was exported or shared.

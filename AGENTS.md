@@ -22,8 +22,7 @@ checking planned work packages, identifying material shortages, and support expo
   the check; a valid stock quantity of zero is a real stock value.
 - Do not use an `Unknown` status. If a planned installation's code is not in
   the catalogue, leave its details blank and still count its mapped products.
-  If it has no mapped products either, warn that required quantities may be
-  understated.
+  Every planned installation must have mapped products.
 - Do not invent a stock freshness cutoff. Show a source timestamp if one is
   available; only use a freshness threshold if it is agreed and documented.
 - Do not treat a catalogue match or a higher-rated product as proof that an

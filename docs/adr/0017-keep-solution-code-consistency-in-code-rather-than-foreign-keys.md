@@ -23,7 +23,8 @@ An idempotent seed script, run locally, will validate them and write to Supabase
 ## Consequences
 
 - Removing a supplier's solutions leaves existing planned installations and solution products in place.
-- A code missing from the catalogue shows blank details, and its mapped products still count towards demand. A warning appears only if it has no mapped products.
+- A code missing from the catalogue shows blank details, and its mapped products still count towards demand.
+- Every planned installation must have mapped products. A foreign key can't enforce this, because `internal_code` isn't unique in `solution_products`, so the seed script does.
 - The database won't catch a mistyped solution code. The seed script can only report a likely one, because it looks the same as a code from a removed supplier. A production write path would need its own checks.
 - This slice gains no speed, because the app doesn't write. The performance benefit applies only to a future high-concurrency write path, and should be measured there.
 - New data isn't deployed automatically; the owner runs the seed script. The writes aren't one transaction, so a lost connection part-way needs a rerun.
