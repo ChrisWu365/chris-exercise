@@ -103,10 +103,15 @@ jobs:
           host="$(echo "$SMOKE_URL" | sed -E 's#https?://##; s#/.*##')"
           api="https://api.vercel.com"
           id="$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" "$api/v13/deployments/$host?teamId=$VERCEL_ORG_ID" | jq -r '.id')"
-          (sleep 4; curl -s -o /dev/null "$SMOKE_URL") &
-          errors="$(curl -s -m 25 -H "Authorization: Bearer $VERCEL_TOKEN" "$api/v1/projects/$VERCEL_PROJECT_ID/deployments/$id/runtime-logs?teamId=$VERCEL_ORG_ID"             | jq -Rr 'fromjson? | select(.level == "error") | .message' | cut -c1-400 | sort -u || true)"
-          wait
-          echo "${errors:-No server errors were reported, so check the smoke test output above.}"
+          errors=""
+          # The log stream sometimes returns nothing at first, so try a few times.
+          for attempt in 1 2 3; do
+            (sleep 5; curl -s -o /dev/null "$SMOKE_URL"; sleep 3; curl -s -o /dev/null "$SMOKE_URL") &
+            errors="$(curl -s -m 25 -H "Authorization: Bearer $VERCEL_TOKEN" "$api/v1/projects/$VERCEL_PROJECT_ID/deployments/$id/runtime-logs?teamId=$VERCEL_ORG_ID"               | jq -Rr 'fromjson? | select(.level == "error") | .message' | cut -c1-400 | sort -u || true)"
+            wait
+            if [ -n "$errors" ]; then break; fi
+          done
+          echo "${errors:-No server errors could be read. This doesn't prove there were none, so check Logs in Vercel.}"
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
