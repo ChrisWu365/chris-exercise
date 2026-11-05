@@ -15,6 +15,7 @@
     "test:integration": "vitest run --dir tests/integration",
     "test:e2e": "playwright test",
     "check:browser-files": "node scripts/check-browser-files.ts",
+    "check:ac-coverage": "node scripts/check-ac-coverage.ts",
     "seed": "node scripts/seed.ts",
     "test:seed": "vitest run --dir tests/seed"
   },
