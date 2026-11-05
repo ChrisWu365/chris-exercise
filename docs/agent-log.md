@@ -582,6 +582,18 @@ The user declined requiring `checks` to merge into `main` (no reason given) and 
 ### Prompt 66 (2026-11-06)
 > yes
 
-The user approved a 15-second limit on the AC-27 logic test, with its assertions unchanged, so the Supabase client's retries can finish.
+The user approved a 15-second limit on the AC-27 logic test, with its assertions unchanged, so the Supabase client's retries can finish. The agent then wrote the Task 7 tests and stopped for review.
 
 **Files read:** none.
+
+
+### Prompt 67 (2026-11-06)
+> yes
+
+**Files read:** none. The agent connected "Export" to the CSV builder for Task 7.
+
+
+### Prompt 68 (2026-11-06)
+> yes
+
+**Files read:** none. The agent committed and pushed Task 7 so CI could run its browser tests.
