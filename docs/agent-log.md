@@ -82,6 +82,78 @@ This log tracks how the coding agent (Claude Code) was directed and corrected du
 - **Decision:** Changed to Auckland time for the demo; the time zone remains an open decision for real projects.
 - **Reason:** The demo will be presented in Auckland.
 
+### 2026-11-05: Replacing the recorded escalation with a CSV export
+- **Task:** Decide what action the first slice gives a team leader after checking materials, and how tightly the documents are scoped.
+- **Agent suggested:** A spec and design centred on recording an escalation inside the app, with a demo reset and many rules the brief doesn't state.
+- **Decision:** Rejected. The slice now exports the check result as a CSV snapshot; the user updated the plan and spec summary and added guardrail rules to `AGENTS.md`. The spec and design will be rewritten later.
+- **Reason:** Too many assumptions not in the brief; a recorded escalation has very limited business value in this slice and doesn't form a closed loop; the guardrails keep the slice narrow and focused.
+
+### 2026-11-05: Acceptance criteria format
+- **Task:** Make acceptance criteria specific enough to direct and verify the work.
+- **Agent suggested:** Given-When-Then with tables of examples and lettered IDs such as AC-18a, while saying the format wasn't strictly necessary.
+- **Decision:** `AGENTS.md` now requires IDs such as AC-01, Given / When / Then form, concrete sample values, one behaviour per criterion and an observable "Then".
+- **Reason:** The user first raised that Given-When-Then gives a more structured and clear way of presenting business requirements, and set these rules as guardrails for the agent.
+
+### 2026-11-05: Check flow, combined result, `Unknown` and data model
+- **Task:** Settle the open questions on the export slice and revise the data model, starting with `docs/02-slice-spec.md`.
+- **Agent suggested:** One-page selection, per-package checks, keeping `Unknown` in the export, and read-only Supabase left as the user's choice.
+- **Decision:** Tick then "Check", no pagination, a combined result across selected packages, browser-built export from a dialog, `Unknown` and escalation removed, blank details for a missing catalogue match, and the user's Supabase tables, constraints, read-only RLS and TypeScript calculation.
+- **Reason:** Team leaders often work on several packages at once, so per-package checks have little business value; a team leader is assumed to have few packages; blanks show that information is missing; deployed code must read from Supabase.
+
+### 2026-11-05: Review of the rewritten spec's check and catalogue rules
+- **Task:** Make the check timing, dashboard status and catalogue blanks clear enough to test.
+- **Agent suggested:** Stock read "when it is selected"; AC-03 implying a status could appear after a check; AC-10 saying "the same"; AC-27 saying "stock can't be read"; keeping the word `Blank` as a service type.
+- **Decision:** Corrected all five. The user also kept the missing foreign key, approved a one-line warning above the result, and updated the `AGENTS.md` purpose; the agent updated the `Unknown` rule there.
+- **Reason:** Stock is read when the team leader clicks "Check"; status appears only on the dialog; "the same" may change meaning if criteria move; the agent's AC-27 wording was unclear; `Blank` is an adjective, not a real value.
+
+### 2026-11-05: Where seeding runs and what "one file each round" covers
+- **Task:** Plan the technical design round, including the seed path and out-of-date architecture records.
+- **Agent suggested:** Asking how CI could seed the hosted database, and treating ADR updates as a separate file needing separate approval.
+- **Decision:** The user created an online Supabase project for the local environment, and the seed runs from there rather than CI. ADRs are updated alongside the design in the same round.
+- **Reason:** "One file each round" refers to the spec, the technical design and the test strategy; ADRs go with whichever file makes them out of date.
+
+### 2026-11-05: Supabase projects and the shortfall for `Available`
+- **Task:** Settle which database the deployed app reads, and what the CSV and dialog show when a product isn't short.
+- **Agent suggested:** One online Supabase project for local development and the deployed app, and a shortfall of 0 for `Available`.
+- **Decision:** Rejected both. There is one project for the local environment and another for production, and `Available` shows no shortfall of 0.
+- **Reason:** The user created two projects and stated both decisions; no further reason was given.
+
+### 2026-11-06: Link from planned installations to solution products
+- **Task:** Make the data model show how a planned installation finds its products.
+- **Agent suggested:** Reaching `solution_products` only through `solutions` in the data model diagram.
+- **Decision:** Changed. `planned_installations` now links directly to `solution_products` on `internal_code`.
+- **Reason:** When information is missing from the `solutions` table, a join query can still be done.
+
+### 2026-11-06: Foreign key from solution products to solutions
+- **Task:** Decide how a code missing from the catalogue can still find its products.
+- **Agent suggested:** Keeping the foreign key until decided, while recommending its removal, and noting that a mistyped code wouldn't be caught.
+- **Decision:** Removed. Code keeps solution codes consistent; missing-match codes with mapped products now count towards demand.
+- **Reason:** Let the code take care of consistency, which improves high concurrency performance.
+
+### 2026-11-06: No foreign keys to `solutions`, and the seed's mistyped code check
+- **Task:** Confirm which foreign keys go, and keep existing data safe if a supplier is removed.
+- **Agent suggested:** Asking whether all foreign keys should go, and making the seed abort on a `solution_products` code in neither the catalogue nor a planned installation.
+- **Decision:** Remove any foreign key to `solutions`; others stay. The agent changed its abort rule to a report, because that rule would have blocked the seed for a removed supplier's data.
+- **Reason:** A supplier may be removed from the business, which shouldn't affect existing `planned_installations` and `solution_products` data.
+
+### 2026-11-06: Every planned installation must have solution products
+- **Task:** Relate planned installations to their products in the data model.
+- **Agent suggested:** Allowing a planned code with no mapped products, shown blank with a warning; then three options, because a direct foreign key isn't possible.
+- **Decision:** Every planned installation must have solution products. The user didn't pick an option by name; the agent applied its recommended `solution_codes` table and removed the warning, for the user to confirm.
+- **Reason:** For each planned installation, there must be some solution products related to it by the foreign key.
+
+### 2026-11-06: `solution_codes` table rejected
+- **Task:** Decide how planned installations relate to solution products in the data model.
+- **Agent suggested:** A new `solution_codes` table, referenced by foreign keys from both tables, with the warning and related criteria removed.
+- **Decision:** Rejected. The documents return to the version before that table, and the agent removed its uncommitted ADR-0018.
+- **Reason:** The user wasn't happy with `solution_codes` and prefers the previous version.
+
+### 2026-11-06: Invalid quantities listed as calculation examples
+- **Task:** Keep the test strategy's examples to cases that can really happen.
+- **Agent suggested:** Listing `"1.2345"` and `"abc"` as quantities in the decimal calculation examples under AC-11.
+- **Decision:** Moved. They are now seed input cases, with a note that `numeric(12,3)` would silently round `1.2345`.
+- **Reason:** The user pointed out that the field type is `numeric(12,3)`, so these values can't happen there.
+
 ## Prompts and files read
 
 Prompts are verbatim.
@@ -158,3 +230,110 @@ This log was not updated during that task because the prompt said not to change 
 > commit now. Use conventional commit format, one concern per commit
 
 **Files read:** None opened directly. The agent checked the working tree and searched the changed files for the company name with Git.
+
+### Prompt 14 (2026-11-05)
+> please add the application of adr to AGENTS.md to update the working practice
+
+**Files read:** None. The agent edited `AGENTS.md` from the content it had already read.
+
+### Prompt 15 (2026-11-05)
+> let's start  the test strategy. create a /docs/04-test-strategy.md file to store it.
+
+**Files read:** `docs/02-slice-spec.md` (from line 50), `docs/03-technical-design.md` (search for test and CI references), `data/source/solutions-excerpt.csv` (search for example rows). The agent also checked the Auckland date examples with Node and checked the new file's coverage and links with a script.
+
+### Prompt 16 (2026-11-05)
+> I find that your AC in /docs/02-slice-spec.md does not use Given-When-Then format, which gives a more structured and clear way of presenting business requirements. Do you think it is necessary?
+
+**Files read:** None. The agent reviewed the acceptance criteria it had already read.
+
+### Prompt 17 (2026-11-05)
+> I find that you are making too many assumptions that is not mentioned in the brief when writing 02-slice-spec.md and 03-technical-design.md. And I notice that the escalation of material shortages in this first spice has very limited business value and do not form a closed-loop, so I have decided to implement export of the check result instead. I have updated 01-iteration-plan.md, Summary section in 02-slice-spec.md, and add Acceptance criteria and Tests and verification rules in AGENTS.md. please read the changes. the purpose is to add guiderail for you so that we can keep the scope of this slice narrow and focused. I need you to rewrite the 02-slice-spec.md and 03-technical-design.md later with the update slice and rules. please read the updates first and check if any of the update slice information contains unknown or conflict information.
+
+**Files read:** `AGENTS.md`, `docs/01-iteration-plan.md`, `docs/02-slice-spec.md`, `docs/03-technical-design.md`, `docs/brief/take-home-brief.pdf`, `docs/adr/README.md`, ADRs 0003, 0004, 0005, 0007, 0009 and 0010, `docs/agent-log.md` (from line 60). The agent also viewed the Git diff, the first lines of `data/source/solutions-excerpt.csv`, and searched the repository and `docs/04-test-strategy.md` for escalation references.
+
+### Prompt 18 (2026-11-05)
+> 1. tick packages and then click the 'Check' button to run the check, statuses do not appear first.  'Export' button appears in a pop-up dialog and exports data from the frontend data, not from server side. assuming that there will not be too many planned work packages for a team leader, load all planned work packages without pagination. 2. Because a team leader can often work on several  packages at the same time, so per-package check is with little business value. Check all the products in the selected packages against the current stock and show the combined result on the top of the dialog. 3. accept your recommendation 4.  Remove Unknown, if catalogue_solution does not contain matched records, just leave it blank, so the team leader can also know that the information is missing, which aligns with the requirement of the brief. no 'Escalate' in this slice, the team leader will notify others out of the system if needed. 5. Add a notice column for sample data, unreserved stock and "not a compliance statement". Name the time column exported_at. write all the sample data in a json file, but import them to the supabase database for any query. 6 deployed code must
+> read from Supabase, not from bundled files.
+>
+> Revise the data model section with these decisions:
+> - Runtime store is Supabase. Tables: solutions (all 148 rows from the
+>   CSV, cleaned values plus raw values), products, solution_products,
+>   work_packages, planned_installations, stock. All except solutions
+>   hold SAMPLE data.
+> - Files are seed sources only: the CSV plus SAMPLE files under
+>   data/sample/. An idempotent seed script validates them and writes to
+>   Supabase. Invalid input aborts without writing.
+> - Enforce completeness with constraints: NOT NULL, foreign keys,
+>   positive quantities, quantity_on_hand >= 0, one stock row per product.
+> - RLS enabled on every table with select-only policies. No write
+>   policies. The service_role key is used only by the local seed script.
+> - Aggregation and status logic run in pure TypeScript, not SQL.
+>   Record the trade-off.
+> - Quantities use numeric in the database. Define how decimal
+>   comparison avoids floating point errors.
+>
+> Remove everything related to escalation. Show me the diff of the data
+> model section only and stop. Also append an agent-log entry for this
+> correction. let's do the changes from 02-slice-spec.md, and then the technical design and test strategy, one file each round
+
+**Files read:** `data/source/solutions-excerpt.csv` (profiled with a script). The agent rewrote `docs/02-slice-spec.md` from content it had already read.
+
+### Prompt 19 (2026-11-05)
+> for 02-slice-spec.md: 1. FR-2 Select and check. not 'The check uses the stock recorded when it is selected', it is 'The check uses the stock recorded when team leader click the Check button' 2. the AC-03 is incorrect, there is no status on the dashboard, status is only on the dialog. 3. the AC-10 information is incomplete, 'the same' may have other meaning if the AC changes order. 4. for AC-27, what do you mean by stock can't be read? for open questions: 1. keep your idea 2.  one-line warning above the result is ok 3. yes, update both. 4. Blank is not a real value, it is a adj.
+
+**Files read:** `data/source/solutions-excerpt.csv` (searched for the word `Blank`). The agent edited `docs/02-slice-spec.md`, `AGENTS.md` and `docs/agent-log.md` from content it had already read.
+
+### Prompt 20 (2026-11-05)
+> for Seeding, I have created a supabase project online for local environment. one file each round mean the 02-slice-spec.md, 03-technical-design.md and 04-test-strategy.md. you can ADRs together with the one file to update what is out of date.
+
+**Files read:** ADRs 0002, 0006 and 0008, `.gitignore`. The agent rewrote `docs/03-technical-design.md`, added ADRs 0011 to 0015, and updated older ADR statuses and the ADR index.
+
+### Prompt 21 (2026-11-05)
+> Open questions: 1. i create one supabase project for local environment and the other one for production. 2. Available do not show shortfall of 0
+
+**Files read:** None. The agent edited `docs/03-technical-design.md`, `docs/02-slice-spec.md`, `docs/adr/README.md` and `docs/agent-log.md` from content it had already read, and added ADR 0016.
+
+### Prompt 22 (2026-11-06)
+> for 03-technical-design.md, planned_installations should also link to solution_products, so when there are missing information in  solutions table, they can still do a join query.
+
+**Files read:** None. The agent edited `docs/03-technical-design.md` and `docs/agent-log.md` from content it had already read, and checked the diagrams with a parser.
+
+### Prompt 23 (2026-11-06)
+> Remove the foreign key constraint, let the code take care of consistency, which improves high concurrency performance.
+
+**Files read:** None. The agent edited `docs/02-slice-spec.md`, `docs/03-technical-design.md`, `AGENTS.md`, `docs/adr/README.md`, ADR 0014 and `docs/agent-log.md` from content it had already read, and added ADR 0017.
+
+### Prompt 24 (2026-11-06)
+> 1. remove any foreign key to solutions table, because the supplier may be removed from the business some times, which shouldn't affect the existing planned_installations and solution_products data. 2. correct open question 1 first
+
+**Files read:** None. The agent edited `docs/02-slice-spec.md`, `docs/03-technical-design.md`, ADR 0017 and `docs/agent-log.md` from content it had already read.
+
+### Prompt 25 (2026-11-06)
+> planned_installations table should have foreign to solution_products, they are combined together.
+
+**Files read:** None. The agent reviewed the data model it had already read and asked for a decision before changing it, because `internal_code` alone isn't unique in `solution_products`.
+
+### Prompt 26 (2026-11-06)
+> I mean,  for each planned_installations, there must be some solution_products related to it by the foreign key solution_products.
+
+**Files read:** None. The agent edited `docs/02-slice-spec.md`, `docs/03-technical-design.md`, `AGENTS.md`, `docs/adr/README.md`, ADR 0017 and `docs/agent-log.md` from content it had already read, and added ADR 0018.
+
+### Prompt 27 (2026-11-06)
+> No, i'm not happy with solution_codes. i prefer the previous version
+
+**Files read:** None. The agent reversed its previous edits to `docs/02-slice-spec.md`, `docs/03-technical-design.md`, `AGENTS.md`, `docs/adr/README.md` and ADR 0017, and deleted ADR 0018.
+
+### Prompt 28 (2026-11-06)
+> the technical design is approved. let's go on with test strategy
+
+**Files read:** `docs/04-test-strategy.md`, `docs/02-slice-spec.md` (acceptance criteria). The agent also searched the ADRs for test strategy references, then rewrote `docs/04-test-strategy.md` and checked its coverage with a script.
+
+### Prompt 29 (2026-11-06)
+> why it list '"1.2345" or "abc" as a quantity' in the Example cases section of test strategy, the data field type is numeric 12,3, how can it happen
+
+**Files read:** None. The agent reviewed the test strategy and design it had already read, and proposed a change without making it.
+
+### Prompt 30 (2026-11-06)
+> change please
+
+**Files read:** None. The agent edited `docs/04-test-strategy.md` and `docs/agent-log.md` from content it had already read.
