@@ -358,3 +358,10 @@ This log was not updated during that task because the prompt said not to change 
 > commit and push these changes
 
 **Files read:** None opened directly. The agent checked the working tree and searched the changed files for the company name.
+
+### Prompt 34 (2026-11-06)
+> Start building, Task: walking skeleton. No domain logic in this task.
+> Goal: a deployed page that reads real data from Supabase, with CI
+> running checks and deploying through GitHub Actions.
+
+**Files read:** `README.md`, `.gitignore`, `tsconfig.json`, `supabase/.gitignore`. The agent also checked installed tools, GitHub secret names and package versions, and installed dependencies.
